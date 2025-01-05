@@ -1,3 +1,4 @@
+import 'package:codefactory/common/utils/app_logger.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -13,7 +14,7 @@ class CustomInterceptor extends Interceptor {
   @override
   Future<void> onRequest(
       RequestOptions options, RequestInterceptorHandler handler) async {
-    print('[REQ] [${options.method}] ${options.uri}');
+    AppLogger.instance.i('[REQ] [${options.method}] ${options.uri}');
 
     if (options.headers['accessToken'] == 'true') {
       options.headers.remove('accessToken');
@@ -28,13 +29,15 @@ class CustomInterceptor extends Interceptor {
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
-    print('[RES] [${response.requestOptions.method}] ${response.requestOptions.uri}');
+    AppLogger.instance.i(
+        '[RES] [${response.requestOptions.method}] ${response.requestOptions.uri}');
     super.onResponse(response, handler);
   }
 
   @override
   Future<void> onError(DioError err, ErrorInterceptorHandler handler) async {
-    print('[ERR] [${err.requestOptions.method}] ${err.requestOptions.uri}');
+    AppLogger.instance
+        .i('[ERR] [${err.requestOptions.method}] ${err.requestOptions.uri}');
 
     final refreshToken = await storage.read(key: REFRESH_TOKEN_KEY);
 
@@ -51,7 +54,7 @@ class CustomInterceptor extends Interceptor {
     if (isStatus401 && !isPathRefresh) {
       final dio = Dio();
 
-      try{
+      try {
         final resp = await dio.post(
           'http://$ip/auth/token',
           options: Options(
@@ -73,7 +76,7 @@ class CustomInterceptor extends Interceptor {
         final response = await dio.fetch(options);
 
         return handler.resolve(response);
-      }on DioError catch(e){
+      } on DioError catch (e) {
         return handler.reject(e);
       }
     }
