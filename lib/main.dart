@@ -1,6 +1,7 @@
 import 'package:codefactory/common/utils/app_config.dart';
 import 'package:codefactory/common/view/splash_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() async {
   // 플러터 엔진과 네이티브 플랫폼 초기화
@@ -9,7 +10,9 @@ void main() async {
   // 앱 설정 초기화(환경 설정 파일 로드 등)
   final config = AppConfig();
   await config.initialize();
-  runApp(_App());
+  runApp(
+    ProviderScope(child: _App()),
+  );
 }
 
 class _App extends StatelessWidget {

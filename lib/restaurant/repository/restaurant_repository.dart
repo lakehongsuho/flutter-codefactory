@@ -1,7 +1,10 @@
+import 'package:codefactory/common/const/data.dart';
+import 'package:codefactory/common/dio/dio.dart';
 import 'package:codefactory/common/model/cursor_pagination_model.dart';
 import 'package:codefactory/restaurant/model/restaurant_detail_model.dart';
 import 'package:codefactory/restaurant/model/restaurant_model.dart';
 import 'package:dio/dio.dart' hide Headers;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:retrofit/retrofit.dart';
 
 part 'restaurant_repository.g.dart';
@@ -11,6 +14,11 @@ part 'restaurant_repository.g.dart';
 // API 호출 시 정의된 어노테이션을 기반으로 HTTP 요청을 구성합니다.
 // 응답 데이터는 정의된 모델 클래스(RestaurantModel, RestaurantDetailModel)로 자동 변환됩니다.
 // 4. 페이지네이션된 데이터는 CursorPagination 모델을 통해 처리됩니다.
+
+final restaurantRepositoryProvider = Provider<RestaurantRepository>((ref) {
+  final dio = ref.watch(dioProvider);
+  return RestaurantRepository(dio, baseUrl: 'http://$ip/restaurant');
+});
 
 @RestApi()
 abstract class RestaurantRepository {

@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
-import 'package:intl/intl.dart';
+// import 'package:intl/intl.dart';
 
 class AppLogger {
   static final Logger _logger = Logger(
@@ -8,10 +8,9 @@ class AppLogger {
     printer: PrettyPrinter(
       printEmojis: true,
       colors: true,
-      methodCount: 1,
+      methodCount: 0,
       errorMethodCount: 8,
-      dateTimeFormat: (dateTime) =>
-          DateFormat('yyyy-MM-dd HH:mm:ss').format(dateTime.toLocal()),
+      // dateTimeFormat: (dateTime) => DateFormat('yyyy-MM-dd HH:mm:ss').format(dateTime.toLocal()),
     ),
   );
 

@@ -1,9 +1,23 @@
 import 'package:codefactory/common/utils/app_logger.dart';
+import 'package:codefactory/common/utils/secure_storage.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../const/data.dart';
 
+// 디오 프로바이더
+final dioProvider = Provider<Dio>((ref) {
+  final dio = Dio();
+
+  dio.interceptors.add(
+    CustomInterceptor(storage: ref.watch(secureStorageProvider)),
+  );
+
+  return dio;
+});
+
+// 디오 인터셉터
 class CustomInterceptor extends Interceptor {
   final FlutterSecureStorage storage;
 

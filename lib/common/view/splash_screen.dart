@@ -1,20 +1,22 @@
 import 'package:codefactory/common/const/colors.dart';
 import 'package:codefactory/common/layout/default_layout.dart';
+import 'package:codefactory/common/utils/secure_storage.dart';
 import 'package:codefactory/user/view/login_screen.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../const/data.dart';
 import 'root_tab.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   void initState() {
     super.initState();
@@ -22,13 +24,15 @@ class _SplashScreenState extends State<SplashScreen> {
     checkToken();
   }
 
-  void deleteToken() async {
-    await storage.deleteAll();
+  void deleteToken(WidgetRef ref) async {
+    await ref.read(secureStorageProvider).deleteAll();
   }
 
   void checkToken() async {
     // final accessToken = await storage.read(key: ACCESS_TOKEN_KEY); // 유효기간 하루
-    final refreshToken = await storage.read(key: REFRESH_TOKEN_KEY); // 유효기간 5분
+    final refreshToken = await ref
+        .read(secureStorageProvider)
+        .read(key: REFRESH_TOKEN_KEY); // 유효기간 5분
 
     final Dio dio = Dio();
 
@@ -42,8 +46,9 @@ class _SplashScreenState extends State<SplashScreen> {
         ),
       );
 
-      await storage.write(
-          key: ACCESS_TOKEN_KEY, value: resp.data['accessToken']);
+      await ref
+          .read(secureStorageProvider)
+          .write(key: ACCESS_TOKEN_KEY, value: resp.data['accessToken']);
 
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(
