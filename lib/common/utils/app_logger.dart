@@ -1,24 +1,32 @@
+import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
 import 'package:intl/intl.dart';
 
 class AppLogger {
-  // 싱글톤 인스턴스
   static final Logger _logger = Logger(
-    level: Level.info, // 기본 로그 레벨 설정, 프로덕션 환경에서는 Level.warning 이상으로 설정
+    level: _getLogLevel(), // 환경에 따라 로그 레벨 설정
     printer: PrettyPrinter(
       printEmojis: true,
       colors: true,
       methodCount: 1,
       errorMethodCount: 8,
       dateTimeFormat: (dateTime) =>
-          DateFormat('yyyy-MM-dd HH:mm:ss').format(dateTime.toLocal()), // 포맷 지정
-    ), // 로그 출력 형식 설정
+          DateFormat('yyyy-MM-dd HH:mm:ss').format(dateTime.toLocal()),
+    ),
   );
 
-  // 외부에서 접근할 수 있는 로거 인스턴스
   static Logger get instance => _logger;
-}
 
+  // 환경에 따라 로그 레벨을 반환하는 메서드
+  static Level _getLogLevel() {
+    // 환경 변수에 따라 적절한 .env 파일 로드
+    if (kReleaseMode) {
+      return Level.warning; // 프로덕션 환경에서는 경고 이상의 로그만 출력
+    } else {
+      return Level.debug; // 개발 환경에서는 정보 이상의 로그 출력
+    }
+  }
+}
 
 // logger 패키지에서 제공하는 로그 레벨은 다음과 같습니다. 각 레벨은 로그의 중요도에 따라 다르게 사용됩니다:
 // Level.verbose: 가장 낮은 로그 레벨로, 매우 상세한 정보를 기록할 때 사용합니다. 주로 디버깅 목적으로 사용됩니다.
