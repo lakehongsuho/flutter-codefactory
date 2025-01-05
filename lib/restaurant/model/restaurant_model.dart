@@ -1,8 +1,6 @@
 import 'package:codefactory/common/utils/data_utils.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-import '../../common/const/data.dart';
-
 part 'restaurant_model.g.dart';
 
 enum RestaurantPriceRange { cheap, medium, expensive }

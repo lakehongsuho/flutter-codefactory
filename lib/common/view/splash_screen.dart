@@ -27,7 +27,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void checkToken() async {
-    final accessToken = await storage.read(key: ACCESS_TOKEN_KEY); // 유효기간 하루
+    // final accessToken = await storage.read(key: ACCESS_TOKEN_KEY); // 유효기간 하루
     final refreshToken = await storage.read(key: REFRESH_TOKEN_KEY); // 유효기간 5분
 
     final Dio dio = Dio();
@@ -42,7 +42,8 @@ class _SplashScreenState extends State<SplashScreen> {
         ),
       );
 
-      await storage.write(key: ACCESS_TOKEN_KEY, value: resp.data['accessToken']);
+      await storage.write(
+          key: ACCESS_TOKEN_KEY, value: resp.data['accessToken']);
 
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(

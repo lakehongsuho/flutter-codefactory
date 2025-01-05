@@ -6,7 +6,6 @@ import 'package:codefactory/common/layout/default_layout.dart';
 import 'package:codefactory/common/view/root_tab.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../../common/component/custom_text_form_field.dart';
 import '../../common/const/colors.dart';
@@ -97,8 +96,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     final refreshToken = response.data['refreshToken'];
                     final accessToken = response.data['accessToken'];
 
-                    await storage.write(key: REFRESH_TOKEN_KEY, value: refreshToken);
-                    await storage.write(key: ACCESS_TOKEN_KEY, value: accessToken);
+                    await storage.write(
+                        key: REFRESH_TOKEN_KEY, value: refreshToken);
+                    await storage.write(
+                        key: ACCESS_TOKEN_KEY, value: accessToken);
 
                     // 로그인 성공 시, RootTab으로 이동
                     Navigator.of(context).push(
