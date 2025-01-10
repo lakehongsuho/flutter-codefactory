@@ -7,7 +7,7 @@ void main() async {
   // 플러터 엔진과 네이티브 플랫폼 초기화
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 앱 설정 초기화(환경 설정 파일 로드 등)
+  // 앱 설정 초기화(환경설정 파일 로드 등)
   final config = AppConfig();
   await config.initialize();
   runApp(
