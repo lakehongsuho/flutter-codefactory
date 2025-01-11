@@ -1,7 +1,19 @@
 import 'package:codefactory/common/model/cursor_pagination_model.dart';
 import 'package:codefactory/common/model/pagination_params.dart';
+import 'package:codefactory/restaurant/model/restaurant_model.dart';
 import 'package:codefactory/restaurant/repository/restaurant_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+final restaurantDetailProvider =
+    Provider.family<RestaurantModel?, String>((ref, id) {
+  final state = ref.watch(restaurantProvider);
+
+  if (state is! CursorPagination) {
+    return null;
+  }
+
+  return state.data.firstWhere((element) => element.id == id);
+});
 
 final restaurantProvider =
     StateNotifierProvider<RestaurantStateNotifier, CursorPaginationBase>((ref) {
@@ -115,5 +127,36 @@ class RestaurantStateNotifier extends StateNotifier<CursorPaginationBase> {
       // 4. 에러 발생 시
       state = CursorPaginationError(message: e.toString());
     }
+  }
+
+  void getDetail({
+    required String id,
+  }) async {
+    // 디테일 스테이트를 가져오는 상황은 이미 스테이트가 커서페이지네이션 상태라는 것을 가정한다.
+    // 레스토랑 리스트가 있어야만, 디테일 스테이트를 가져올 수 있기 때문이다(캐싱).
+
+    // 커서페이지네이션 상태가 아니라면 paginate()를 통해서 커서페이지네이션 상태로 변환한다.
+    if (state is! CursorPagination) {
+      await paginate();
+    }
+
+    // 페이지네이트를 진행했음에도 커서페이지네이션 상태가 아니라면, 그냥 리턴한다.
+    if (state is! CursorPagination) {
+      return;
+    }
+
+    // state가 당연히 CursorPagination이라는 것을 가정한다.
+    final pState = state as CursorPagination;
+
+    // 레스토랑 디테일 데이터를 페치한다.
+    final resp = await repository.getRestaurantDetail(id: id);
+
+    // 기존 데이터에 페치한 데이터를 오버라이트한다.
+    // [RM(1), RM(2), RM(3)] → [RM(1), RDM(2), RM(3)]
+    state = pState.copyWith(
+      data: pState.data
+          .map<RestaurantModel>((e) => e.id == id ? resp : e)
+          .toList(),
+    );
   }
 }

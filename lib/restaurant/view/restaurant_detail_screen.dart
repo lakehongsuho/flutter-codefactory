@@ -1,12 +1,16 @@
 import 'package:codefactory/common/layout/default_layout.dart';
 import 'package:codefactory/product/component/product_card.dart';
+import 'package:codefactory/rating/component/rating_card.dart';
 import 'package:codefactory/restaurant/component/restaurant_card.dart';
 import 'package:codefactory/restaurant/model/restaurant_detail_model.dart';
-import 'package:codefactory/restaurant/repository/restaurant_repository.dart';
+import 'package:codefactory/restaurant/model/restaurant_model.dart';
+import 'package:codefactory/restaurant/provider/restaurant_provider.dart';
+// import 'package:codefactory/restaurant/repository/restaurant_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:skeletons/skeletons.dart';
 
-class RestaurantDetailScreen extends ConsumerWidget {
+class RestaurantDetailScreen extends ConsumerStatefulWidget {
   final String id;
 
   const RestaurantDetailScreen({
@@ -14,37 +18,80 @@ class RestaurantDetailScreen extends ConsumerWidget {
     super.key,
   });
 
-  Future<RestaurantDetailModel> getRestaurantDetail(WidgetRef ref) async {
-    return ref.watch(restaurantRepositoryProvider).getRestaurantDetail(id: id);
+  @override
+  ConsumerState<RestaurantDetailScreen> createState() =>
+      _RestaurantDetailScreenState();
+}
+
+class _RestaurantDetailScreenState
+    extends ConsumerState<RestaurantDetailScreen> {
+  @override
+  void initState() {
+    super.initState();
+    ref.read(restaurantProvider.notifier).getDetail(id: widget.id);
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
+    final state = ref.watch(restaurantDetailProvider(widget.id));
+
+    if (state == null) {
+      return const DefaultLayout(
+        child: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     return DefaultLayout(
       title: '식당 상세',
-      child: FutureBuilder<RestaurantDetailModel>(
-        builder: (_, AsyncSnapshot<RestaurantDetailModel> snapshot) {
-          if (snapshot.hasError) {
-            return Center(
-              child: Text(snapshot.error.toString()),
-            );
-          }
+      child: CustomScrollView(
+        slivers: [
+          renderTop(model: state),
+          if (state is! RestaurantDetailModel) renderLoading(),
+          if (state is RestaurantDetailModel) renderLabel(),
+          if (state is RestaurantDetailModel)
+            renderProducts(products: state.products),
+          const SliverPadding(
+            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 32.0),
+            sliver: SliverToBoxAdapter(
+              child: RatingCard(
+                email: 'lakehongusho@gmail.com',
+                rating: 4,
+                content: '맛있어요',
+                images: [],
+                avatarImage: AssetImage(
+                  'asset/img/logo/codefactory_logo.png',
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-          if (!snapshot.hasData) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-
-          return CustomScrollView(
-            slivers: [
-              renderTop(model: snapshot.data!),
-              renderLabel(),
-              renderProducts(products: snapshot.data!.products),
-            ],
-          );
-        },
-        future: getRestaurantDetail(ref),
+  SliverPadding renderLoading() {
+    return SliverPadding(
+      padding: const EdgeInsets.symmetric(
+        vertical: 16.0,
+        horizontal: 16.0,
+      ),
+      sliver: SliverList(
+        delegate: SliverChildListDelegate(
+          List.generate(
+            3,
+            (index) => Padding(
+              padding: const EdgeInsets.only(bottom: 32.0),
+              child: SkeletonParagraph(
+                style: const SkeletonParagraphStyle(
+                  lines: 5,
+                  padding: EdgeInsets.zero,
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -87,7 +134,7 @@ class RestaurantDetailScreen extends ConsumerWidget {
   }
 
   SliverToBoxAdapter renderTop({
-    required RestaurantDetailModel model,
+    required RestaurantModel model,
   }) {
     return SliverToBoxAdapter(
       child: RestaurantCard.fromModel(
