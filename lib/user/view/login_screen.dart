@@ -1,10 +1,8 @@
-import 'dart:convert';
 import 'dart:io';
 
-import 'package:codefactory/common/const/data.dart';
 import 'package:codefactory/common/layout/default_layout.dart';
-import 'package:codefactory/common/utils/secure_storage.dart';
-import 'package:codefactory/common/view/root_tab.dart';
+import 'package:codefactory/user/model/user_model.dart';
+import 'package:codefactory/user/provider/user_me_provider.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,6 +11,7 @@ import '../../common/component/custom_text_form_field.dart';
 import '../../common/const/colors.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
+  static get routeName => 'loginScreen';
   const LoginScreen({super.key});
 
   @override
@@ -25,16 +24,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final dio = Dio();
-    // const storage = FlutterSecureStorage();
-
-    // localhost
-    const emulatorIp = '10.0.2.2:3000';
-    const simulatorIp = '127.0.0.1:3000';
-
-    // 실제 기기에서 테스트할 때
-    final ip = Platform.isIOS ? simulatorIp : emulatorIp;
-
+    final state = ref.watch(userMeProvider);
     return DefaultLayout(
       // SingleChildScrollView 키보드가 올라올 때, 화면을 올려준다.
       child: SingleChildScrollView(
@@ -73,48 +63,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
                 const SizedBox(height: 16),
                 TextButton(
-                  onPressed: () async {
-                    // 아이디:비밀번호
-                    // const rawString = 'test@codefactory.ai:testtest';
-                    final rawString = '$username:$password';
-
-                    // Base64 인코딩
-                    Codec<String, String> stringToBase64 = utf8.fuse(base64);
-
-                    // 인코딩된 문자열
-                    String token = stringToBase64.encode(rawString);
-
-                    // 로그인 요청
-                    final response = await dio.post(
-                      'http://$ip/auth/login',
-                      options: Options(
-                        headers: {
-                          'authorization': 'Basic $token',
+                  onPressed: state is UserModelLoading
+                      ? null
+                      : () async {
+                          ref.read(userMeProvider.notifier).login(
+                                username: username,
+                                password: password,
+                              );
                         },
-                      ),
-                    );
-
-                    // 토큰 저장
-                    final refreshToken = response.data['refreshToken'];
-                    final accessToken = response.data['accessToken'];
-
-                    await ref
-                        .read(secureStorageProvider)
-                        .write(key: REFRESH_TOKEN_KEY, value: refreshToken);
-                    await ref
-                        .read(secureStorageProvider)
-                        .write(key: ACCESS_TOKEN_KEY, value: accessToken);
-
-                    // 로그인 성공 시, RootTab으로 이동
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => const RootTab(),
-                      ),
-                    );
-
-                    // 응답 데이터(원래 로컬 서버면 레이턴시가 없는데, 일부로 넣어두었다.)
-                    // print(response.data);
-                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: PRIMARY_COLOR,
                   ),

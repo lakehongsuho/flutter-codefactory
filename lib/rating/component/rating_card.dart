@@ -1,7 +1,6 @@
 import 'package:codefactory/common/const/colors.dart';
+import 'package:codefactory/rating/model/rating_model.dart';
 import 'package:flutter/material.dart';
-// ignore: depend_on_referenced_packages
-import 'package:collection/collection.dart';
 
 class RatingCard extends StatelessWidget {
   final String email;
@@ -19,6 +18,16 @@ class RatingCard extends StatelessWidget {
     super.key,
   });
 
+  factory RatingCard.fromModel({required RatingModel model}) {
+    return RatingCard(
+      email: model.user.username,
+      rating: model.rating,
+      content: model.content,
+      images: model.imgUrls.map((e) => Image.network(e)).toList(),
+      avatarImage: NetworkImage(model.user.imageUrl),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -33,9 +42,13 @@ class RatingCard extends StatelessWidget {
           content: content,
         ),
         const SizedBox(height: 8.0),
-        _Images(
-          images: images,
-        ),
+        if (images.isNotEmpty)
+          SizedBox(
+            height: 100,
+            child: _Images(
+              images: images,
+            ),
+          ),
       ],
     );
   }
@@ -121,16 +134,21 @@ class _Images extends StatelessWidget {
     return ListView(
       scrollDirection: Axis.horizontal,
       children: images
-          .mapIndexed(
-            (index, element) => Padding(
-              padding:
-                  EdgeInsets.only(right: index == images.length - 1 ? 0 : 16.0),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8.0),
-                child: element,
+          .asMap()
+          .map(
+            (index, element) => MapEntry(
+              index,
+              Padding(
+                padding: EdgeInsets.only(
+                    right: index == images.length - 1 ? 0 : 16.0),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8.0),
+                  child: element,
+                ),
               ),
             ),
           )
+          .values
           .toList(),
     );
   }

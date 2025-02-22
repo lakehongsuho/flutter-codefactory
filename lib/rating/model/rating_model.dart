@@ -1,3 +1,4 @@
+import 'package:codefactory/common/model/model_with_id.dart';
 import 'package:codefactory/common/utils/data_utils.dart';
 import 'package:codefactory/user/model/user_model.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -5,7 +6,8 @@ import 'package:json_annotation/json_annotation.dart';
 part 'rating_model.g.dart';
 
 @JsonSerializable()
-class RatingModel {
+class RatingModel implements IModelWithId {
+  @override
   final String id;
   final UserModel user;
   final int rating;
@@ -13,14 +15,14 @@ class RatingModel {
   @JsonKey(
     fromJson: DataUtils.listPathsToUrls,
   )
-  final List<String> imageUrls;
+  final List<dynamic> imgUrls;
 
   RatingModel({
     required this.id,
     required this.user,
     required this.rating,
     required this.content,
-    required this.imageUrls,
+    required this.imgUrls,
   });
 
   factory RatingModel.fromJson(Map<String, dynamic> json) =>

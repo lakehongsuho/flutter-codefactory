@@ -2,6 +2,7 @@ import 'package:codefactory/common/const/data.dart';
 import 'package:codefactory/common/dio/dio.dart';
 import 'package:codefactory/common/model/cursor_pagination_model.dart';
 import 'package:codefactory/common/model/pagination_params.dart';
+import 'package:codefactory/common/respository/base_pagination_repository.dart';
 import 'package:codefactory/restaurant/model/restaurant_detail_model.dart';
 import 'package:codefactory/restaurant/model/restaurant_model.dart';
 import 'package:dio/dio.dart' hide Headers;
@@ -16,19 +17,22 @@ part 'restaurant_repository.g.dart';
 // 응답 데이터는 정의된 모델 클래스(RestaurantModel, RestaurantDetailModel)로 자동 변환됩니다.
 // 4. 페이지네이션된 데이터는 CursorPagination 모델을 통해 처리됩니다.
 
-final restaurantRepositoryProvider = Provider<RestaurantRepository>((ref) {
-  final dio = ref.watch(dioProvider);
-  return RestaurantRepository(dio, baseUrl: 'http://$ip/restaurant');
-});
+final restaurantRepositoryProvider = Provider<RestaurantRepository>(
+  (ref) {
+    final dio = ref.watch(dioProvider);
+    return RestaurantRepository(dio, baseUrl: 'http://$ip/restaurant');
+  },
+);
 
 @RestApi()
-abstract class RestaurantRepository {
-  // RestAPI 통신을 위한 인터페이스
+abstract class RestaurantRepository
+    implements IBasePaginationRepository<RestaurantModel> {
   // http://$ip/restaurant
   factory RestaurantRepository(Dio dio, {String baseUrl}) =
       _RestaurantRepository; // 자동으로 생성된 구현체
 
   // http://$ip/restaurant
+  @override
   @GET('/')
   @Headers({
     'accessToken': 'true',
